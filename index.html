@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algoritmo ATM - Diagrama de Flujo Profesional</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        /* --- VARIABLES DE COLOR (TAILWIND PREMIUM) --- */
+        :root {
+            --bg-main: #090d16;
+            --bg-card: #111827;
+            --border-color: #1f2937;
+            --text-primary: #f9fafb;
+            --text-secondary: #9ca3af;
+            
+            /* Colores de Simbología */
+            --color-terminal: #6366f1;   /* Indigo */
+            --color-io: #f59e0b;         /* Ámbar */
+            --color-decision: #a855f7;   /* Púrpura */
+            --color-process: #0ea5e9;    /* Azul cielo */
+            --color-error: #ef4444;      /* Rojo */
+            --color-lines: #4b5563;      /* Gris conectores */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            font-family: 'Urbanist', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 50px 20px;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 38px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+            background: linear-gradient(to right, #f9fafb, #0ea5e9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            font-size: 18px;
+        }
+
+        /* --- CONTENEDOR GRID ESTRUCTURADO (2 Columnas Principales) --- */
+        .flowchart {
+            display: grid;
+            grid-template-columns: 380px 120px 320px; /* Flujo Central | Espacio Conector | Flujo Excepciones */
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* --- ESTILOS DE LOS NODOS --- */
+        .node {
+            background-color: var(--bg-card);
+            border: 2px solid var(--border-color);
+            padding: 22px 26px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 600;
+            line-height: 1.4;
+            min-height: 76px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .node:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.5);
+        }
+
+        /* 1. Terminales (Inicio / Fin) */
+        .node-terminal {
+            border-radius: 40px;
+            border-color: var(--color-terminal);
+            color: #e0e7ff;
+        }
+        .node-terminal:hover { background-color: rgba(99, 102, 241, 0.05); }
+
+        /* 2. Entrada y Salida (Paralelogramos puros sin deformar texto) */
+        .node-io {
+            border-color: var(--color-io);
+            color: #fef3c7;
+            clip-path: polygon(10% 0%, 100% 0%, 90% 100%, 0% 100%);
+            padding: 22px 40px;
+        }
+        .node-io:hover { background-color: rgba(245, 158, 11, 0.05); }
+
+        /* 3. Decisiones (Rombos estilizados en tarjeta con indicador) */
+        .node-decision {
+            border-color: var(--color-decision);
+            color: #f3e8ff;
+            border-radius: 12px;
+        }
+        .node-decision:hover { background-color: rgba(168, 85, 247, 0.05); }
+        
+        /* 4. Procesos (Rectángulos) */
+        .node-process {
+            border-radius: 8px;
+            border-color: var(--color-process);
+            color: #e0f2fe;
+        }
+        .node-process:hover { background-color: rgba(14, 165, 233, 0.05); }
+
+        /* 5. Bloques de Error (Salidas alternativas) */
+        .node-error {
+            border-radius: 8px;
+            border-color: var(--color-error);
+            color: #fee2e2;
+        }
+        .node-error:hover { background-color: rgba(239, 68, 68, 0.05); }
+
+        /* --- CONECTORES BIEN ALINEADOS (SVG) --- */
+        .line-v {
+            grid-column: 1;
+            display: flex;
+            justify-content: center;
+            height: 45px;
+        }
+        
+        .line-h {
+            grid-column: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        .svg-arrow {
+            fill: none;
+            stroke: var(--color-lines);
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* Etiquetas dinámicas para ramificaciones */
+        .tag {
+            font-size: 13px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+            position: absolute;
+            background-color: var(--bg-main);
+        }
+        .tag-si { color: #4ade80; bottom: -28px; left: 53%; transform: translateX(-50%); }
+        .tag-no { color: #f87171; top: -14px; }
+
+        /* --- ASIGNACIÓN DE COLUMNAS GRID --- */
+        .col-main { grid-column: 1; }
+        .col-side { grid-column: 3; }
+        .spacer { grid-column: 1 / span 3; height: 1px; visibility: hidden; }
+
+        /* Línea larga de retorno para unir errores con el FIN */
+        .return-track {
+            grid-column: 3;
+            display: flex;
+            justify-content: center;
+            height: 100%;
+            min-height: 60px;
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Diagrama Algorítmico de Control ATM</h1>
+        <p>Modelo de Validación Multicapa Convergido</p>
+    </header>
+
+    <div class="flowchart">
+
+        <div class="node node-terminal col-main">
+            <i class="fa-solid fa-circle-play"></i> INICIO: Esperando Tarjeta
+        </div>
+        <div class="spacer"></div>
+
+        <div class="line-v">
+            <svg width="20" height="45"><path class="svg-arrow" d="M10,0 L10,45 M4,37 L10,45 L16,37" /></svg>
+        </div>
+        <div class="spacer"></div>
+
+        <div class="node node-io col-main">
+            <i class="fa-solid fa-money-check-dollar"></i> Leer PIN y Monto Solicitado (M)
+        </div>
+        <div class="spacer"></div>
+
+        <div class="line-v">
+            <svg width="20" height="45"><path class="svg-arrow" d="M10,0 L10,45 M4,37 L10,45 L16,37" /></svg>
+        </div>
+        <div class="spacer"></div>
+
+        <div class="node node-decision col-main">
+            <i class="fa-solid fa-shield-lock"></i> ¿PIN es Válido<br>Y M &le; Saldo de Cuenta?
+            <span class="tag tag-si">SÍ</span>
+        </div>
+        
+        <div class="line-h">
+            <span class="tag tag-no">NO</span>
+            <svg width="120" height="20"><path class="svg-arrow" d="M0,10 L120,10 M112,4 L120,10 L112,16" /></svg>
+        </div>
+
+        <div class="node node-error col-side">
+            <i class="fa-solid fa-circle-xmark"></i> Mostrar: "Credenciales Incorrectas o Saldo Insuficiente"
+        </div>
+
+        <div class="line-v">
+            <svg width="20" height="45"><path class="svg-arrow" d="M10,0 L10,45 M4,37 L10,45 L16,37" /></svg>
+        </div>
+        <div></div> <div class="return-track">
+            <svg width="20" height="100%" style="min-height:45px;"><line class="svg-arrow" x1="10" y1="0" x2="10" y2="100%" /></svg>
+        </div>
+
+        <div class="node node-decision col-main">
+            <i class="fa-solid fa-vault"></i> ¿Monto M &le;<br>Efectivo Disponible ATM?
+            <span class="tag tag-si">SÍ</span>
+        </div>
+
+        <div class="line-h">
+            <span class="tag tag-no">NO</span>
+            <svg width="120" height="20"><path class="svg-arrow" d="M0,10 L120,10 M112,4 L120,10 L112,16" /></svg>
+        </div>
+
+        <div class="node node-error col-side">
+            <i class="fa-solid fa-triangle-exclamation"></i> Mostrar: "Terminal sin Líquido Dispuesto"
+        </div>
+
+        <div class="line-v">
+            <svg width="20" height="45"><path class="svg-arrow" d="M10,0 L10,45 M4,37 L10,45 L16,37" /></svg>
+        </div>
+        <div></div>
+        <div class="return-track">
+            <svg width="20" height="100%"><line class="svg-arrow" x1="10" y1="0" x2="10" y2="100%" /></svg>
+        </div>
+
+        <div class="node node-process col-main">
+            <i class="fa-solid fa-calculators"></i> Débito en Cuenta:<br>Saldo = Saldo - M
+        </div>
+        <div></div>
+        <div class="return-track">
+            <svg width="20" height="100%"><line class="svg-arrow" x1="10" y1="0" x2="10" y2="100%" /></svg>
+        </div>
+
+        <div class="line-v">
+            <svg width="20" height="45"><path class="svg-arrow" d="M10,0 L10,45 M4,37 L10,45 L16,37" /></svg>
+        </div>
+        <div></div>
+        <div class="return-track">
+            <svg width="20" height="100%"><line class="svg-arrow" x1="10" y1="0" x2="10" y2="100%" /></svg>
+        </div>
+
+        <div class="node node-io col-main">
+            <i class="fa-solid fa-money-bill-wave"></i> Dispensar Efectivo M e Imprimir Recibo
+        </div>
+        <div></div>
+        
+        <div class="return-track" style="align-items: flex-end;">
+            <svg width="100%" height="50">
+                <path class="svg-arrow" d="M160,0 L160,25 L0,25" />
+            </svg>
+        </div>
+
+        <div class="line-v">
+            <svg width="20" height="45"><path class="svg-arrow" d="M10,0 L10,45 M4,37 L10,45 L16,37" /></svg>
+        </div>
+        <div class="spacer"></div>
+
+        <div class="node node-terminal col-main" style="background-color: #1e1b4b;">
+            <i class="fa-solid fa-power-off"></i> FIN: Devolver Tarjeta de Usuario
+        </div>
+        <div class="spacer"></div>
+
+    </div>
+
+</body>
+</html>
